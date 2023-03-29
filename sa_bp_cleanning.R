@@ -11,7 +11,10 @@ head(building_permits_sa)
 building_permits_sa[!is.na(X_COORD),]
 building_permits_sa[!is.na(X_COORD),summary(X_COORD)]
 
-building_permits_sa <- building_permits_sa[!is.na(X_COORD) & X_COORD>0 & Y_COORD>0,] # keeps 7813 obs out of 8886
+building_permits_sa <- building_permits_sa[!is.na(X_COORD) & X_COORD>100000 & Y_COORD>10000000,] # keeps 7813 obs out of 8886
+building_permits_sa[,year_issued:=year(`DATE ISSUED`)]
+building_permits_sa[,year_submitted:=year(`DATE SUBMITTED`)]
+
 
 # ggplot()+
 #   geom_point(data=building_permits_sa,aes(x=X_COORD,y=Y_COORD))

@@ -52,7 +52,7 @@ exp(log_odds[51])/ (1 + exp(log_odds[51]))
 library(data.table)
 library(foreign)
 
-hts <- data.table(read.spss("06_lab/datasets/HTS.household.10regions.sav",to.data.frame = T))
+hts <- data.table(read.spss("datasets/HTS.household.10regions.sav",to.data.frame = T))
 
 names(hts)
 
@@ -113,43 +113,11 @@ summary(m2)
 
 #---- 4. Learn to apply a Binomial Logit regression model using a real example ----
 
-library(tidycensus)
-
-census_api_key("0d539976d5203a96fa55bbf4421110d4b3db3648")# you must acquired your own key at http://api.census.gov/data/key_signup.html
-
-bexar_medincome_15 <- get_acs(geography = "tract", variables = "B19013_001",
-                              state = "TX", county = "Bexar", geometry = TRUE,year = 2015)
-bexar_medincome_20 <- get_acs(geography = "tract", variables = "B19013_001",
-                              state = "TX", county = "Bexar", geometry = FALSE,year = 2020)
-
-bexar_homevalue_15 <- get_acs(geography = "tract", variables = "B25077_001",
-                              state = "TX", county = "Bexar", geometry = TRUE,year = 2015)
-bexar_homevalue_20 <- get_acs(geography = "tract", variables = "B25077_001",
-                              state = "TX", county = "Bexar", geometry = FALSE,year = 2020)
-
-names(bexar_homevalue_15)[names(bexar_homevalue_15)%in%c("estimate","moe")] <-c("estimate_mhv_15","moe_mhv_15")
-names(bexar_homevalue_20)[names(bexar_homevalue_20)%in%c("estimate","moe")] <-c("estimate_mhv_20","moe_mhv_20")
-
-names(bexar_medincome_15)[names(bexar_medincome_15)%in%c("estimate","moe")] <-c("estimate_mhi_15","moe_mhi_15")
-names(bexar_medincome_20)[names(bexar_medincome_20)%in%c("estimate","moe")] <-c("estimate_mhi_20","moe_mhi_20")
-
-#Merging data
-bexar_mhv<-merge(bexar_homevalue_15,bexar_homevalue_20,by="GEOID",sort = F)
-bexar_mhi<-merge(bexar_medincome_15,bexar_medincome_20,by="GEOID",sort = F)
-
-#Calculating the percentage change
-bexar_mhv$mhv_per_change<-round(((bexar_mhv$estimate_mhv_20/bexar_mhv$estimate_mhv_15)-1),2)
-bexar_mhi$mhi_per_change<-round(((bexar_mhi$estimate_mhi_20/bexar_mhi$estimate_mhi_15)-1),2)
-
-bexar_mhv<-as.data.table(bexar_mhv)
-bexar_mhv<-bexar_mhv[,.(GEOID,estimate_mhv_15,estimate_mhv_20,mhv_per_change)]
-
-bexar_socioeconomic<-merge(x = bexar_mhi,y = bexar_mhv,by="GEOID",sort=F)
-
+source("bexar_socioeconomic.R")
 
 # adding Building permits data
 
-source("10_lab/sa_bp_cleanning.R")
+source("sa_bp_cleanning.R")
 
 # aligning two coordinate systems
 library(sf)
@@ -168,12 +136,14 @@ bp_sa_map<-st_join(x = bp_sa_map,y = bexar_socioeconomic)
 
 bp_sa <- as.data.table(bp_sa_map)
 
-bp_sa <- bp_sa[,.(`PERMIT TYPE`,`PERMIT #`, GEOID)]
-bp_sa <-bp_sa[,.N,by=.(GEOID)]
+bp_sa[,.N,by=.(`PERMIT TYPE`)]
+bp_sa[,.N,by=.(year_issued)]
+bp_sa <- bp_sa[`PERMIT TYPE`%in%c("Comm New Building Permit","Res New Building Permit"),.(`PERMIT TYPE`,`PERMIT #`, GEOID,year_issued)]
+bp_sa <-bp_sa[,.N,by=.(GEOID,year_issued)]
 
-summary(bp_sa$N)
+bp_sa[,summary(N),by=.(year_issued)]
 
-bp_sa[,disp_BP:=as.numeric(N>47)]
+bp_sa[,disp_BP:=as.numeric(N>10)]
 
 # merging back to bexar socioeconimic
 
