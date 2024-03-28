@@ -142,12 +142,13 @@ bp_sa <- bp_sa[`PERMIT TYPE`%in%c("Comm New Building Permit","Res New Building P
 bp_sa <-bp_sa[,.N,by=.(GEOID,year_issued)]
 
 bp_sa[,summary(N),by=.(year_issued)]
+bp_sa[year_issued==2021,summary(N)]
 
 bp_sa[,disp_BP:=as.numeric(N>10)]
 
 # merging back to bexar socioeconimic
 
-bexar_socioeconomic<-merge(bexar_socioeconomic,bp_sa,by="GEOID")
+bexar_socioeconomic<-merge(bexar_socioeconomic,bp_sa[year_issued==2021,],by="GEOID")
 
 
 # modeling

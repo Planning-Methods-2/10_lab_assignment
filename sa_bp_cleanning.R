@@ -1,7 +1,7 @@
 #downloading and cleanning SA Building Permits data
 
 library(data.table)
-building_permits_sa <- fread("https://data.sanantonio.gov/dataset/05012dcb-ba1b-4ade-b5f3-7403bc7f52eb/resource/c21106f9-3ef5-4f3a-8604-f992b4db7512/download/accelaissuedpermitsextract.csv") 
+building_permits_sa <- fread("https://data.sanantonio.gov/dataset/05012dcb-ba1b-4ade-b5f3-7403bc7f52eb/resource/c21106f9-3ef5-4f3a-8604-f992b4db7512/download/permits_issued.csv") 
 
 head(building_permits_sa)
 
