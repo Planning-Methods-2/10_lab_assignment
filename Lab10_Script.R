@@ -110,6 +110,10 @@ odds_a2<- pr_a2/(1-pr_a2)
 m2<-glm(formula = anyvmt ~ hhsize + hhworker + lnhhincome + entropy + pct4way + stopden, data = hts,family = "binomial")
 summary(m2)
 
+exp(m2$coefficients["lnhhincome"])
+
+m3<-glm(formula = anyvmt ~ hhsize + hhworker + lnhhincome + I(lnhhincome*hhsize) + entropy + pct4way + stopden, data = hts,family = "binomial")
+summary(m3)
 
 #---- 4. Learn to apply a Binomial Logit regression model using a real example ----
 
@@ -141,17 +145,29 @@ bp_sa[,.N,by=.(year_issued)]
 bp_sa <- bp_sa[`PERMIT TYPE`%in%c("Comm New Building Permit","Res New Building Permit"),.(`PERMIT TYPE`,`PERMIT #`, GEOID,year_issued)]
 bp_sa <-bp_sa[,.N,by=.(GEOID,year_issued)]
 
-bp_sa[,summary(N),by=.(year_issued)]
+bp_sa[,quantile(N,0.95),by=.(year_issued)]
 bp_sa[year_issued==2021,summary(N)]
 
-bp_sa[,disp_BP:=as.numeric(N>10)]
+bp_sa[,disp_BP:=as.numeric(N>100)]
 
-# merging back to bexar socioeconimic
+ggplot(bp_sa)+
+  geom_density(aes(x=N,color=disp_BP,group=disp_BP))
+
+# merging back to Bexar socioeconomic
 
 bexar_socioeconomic<-merge(bexar_socioeconomic,bp_sa[year_issued==2021,],by="GEOID")
 
+
+mapview::mapview(bexar_socioeconomic,zcol="N",layer.name="BP 2021")
+
+breaksN21<-classInt::classIntervals(bexar_socioeconomic$N,n = 5,style = "jenks")
+mapview::mapview(bexar_socioeconomic,zcol="N",layer.name="BP 2021",at=breaksN21$brks)
 
 # modeling
 
 mod1<-glm(disp_BP ~ mhi_per_change + mhv_per_change,family = "binomial",data=bexar_socioeconomic)
 summary(mod1)
+
+
+mod2<-glm(disp_BP ~ mhi_per_change + mhv_per_change,family = "binomial",data=bexar_socioeconomic[bexar_socioeconomic$N<87,])
+summary(mod2)
