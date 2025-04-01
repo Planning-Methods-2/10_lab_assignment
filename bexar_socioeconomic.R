@@ -21,7 +21,7 @@ names(bexar_medincome_20)[names(bexar_medincome_20)%in%c("estimate","moe")] <-c(
 
 #Merging data
 bexar_mhv<-merge(bexar_homevalue_15,bexar_homevalue_20,by="GEOID",sort = F)
-bexar_mhi<-merge(bexar_medincome_15,bexar_medincome_20,by="GEOID",sort = F)
+bexar_mhi<-merge(bexar_medincome_15,bexar_medincome_20,by="GEOID",sort = F)#
 
 #Calculating the percentage change
 bexar_mhv$mhv_per_change<-round(((bexar_mhv$estimate_mhv_20/bexar_mhv$estimate_mhv_15)-1),2)

@@ -71,7 +71,7 @@ log(prop[2]/(1-prop[2])) # replicating the intercept coefficient
 exp(m0$coefficients)/(1+exp(m0$coefficients)) # replicating the probability
 
 # M1: binomial logit model with a single continuous ind variable: logit(anyvmt) ~ hhsize 
-
+table(hts$hhsize)
 m1<-glm(formula = anyvmt ~ hhsize, data = hts,family = "binomial")
 summary(m1)
 
