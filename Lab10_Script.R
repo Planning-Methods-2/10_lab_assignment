@@ -1,6 +1,6 @@
 # Lab 10 Script: Logit regression
 # The University of Texas at San Antonio
-# URP-5393: Urban Planning Methods II
+# URP-5393: Urban Planning Methods II.
 
 
 #---- Objectives ----
@@ -145,6 +145,8 @@ bp_sa[,.N,by=.(year_issued)]
 bp_sa <- bp_sa[`PERMIT TYPE`%in%c("Comm New Building Permit","Res New Building Permit"),.(`PERMIT TYPE`,`PERMIT #`, GEOID,year_issued)]
 bp_sa <-bp_sa[,.N,by=.(GEOID,year_issued)]
 
+bp_sa[,max(N),by=.(year_issued)]
+
 bp_sa[,quantile(N,0.95),by=.(year_issued)]
 bp_sa[year_issued==2021,summary(N)]
 
@@ -161,7 +163,7 @@ bexar_socioeconomic<-merge(bexar_socioeconomic,bp_sa[year_issued==2021,],by="GEO
 mapview::mapview(bexar_socioeconomic,zcol="N",layer.name="BP 2021")
 
 breaksN21<-classInt::classIntervals(bexar_socioeconomic$N,n = 5,style = "jenks")
-mapview::mapview(bexar_socioeconomic,zcol="N",layer.name="BP 2021",at=breaksN21$brks)
+mapview::mapview(bexar_socioeconomic[bexar_socioeconomic$N<87,],zcol="N",layer.name="BP 2021",at=breaksN21$brks)
 
 # modeling
 
